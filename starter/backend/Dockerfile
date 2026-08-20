@@ -3,6 +3,7 @@ ENV FLASK_RUN_HOST=0.0.0.0
 
 WORKDIR /
 RUN adduser -u 1000 -D app
+
 RUN apk update && \
   apk add \
   pcre \
@@ -12,12 +13,17 @@ RUN apk update && \
   linux-headers \
   openssl \
   libffi-dev \
+  uwsgi \
+  uwsgi-python3 \
   && pip install pipenv
 
 RUN mkdir -p /var/www/app && mkdir /app
 
-COPY Pipfile* /app
-RUN cd /app && pipenv install --system --deploy
+COPY Pipfile /app
+
+RUN cd /app && \
+  sed -i '/^uwsgi = /d' Pipfile && \
+  pipenv install --system --skip-lock
 
 COPY . /app
 
