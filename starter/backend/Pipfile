@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 uwsgi = "*"
 flask = "*"
+flask-cors = "*"
 
 [dev-packages]
 pytest = "*"
