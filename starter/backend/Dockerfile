@@ -1,30 +1,27 @@
 FROM public.ecr.aws/docker/library/python:3.10-alpine
+
 ENV FLASK_RUN_HOST=0.0.0.0
 
 WORKDIR /
+
 RUN adduser -u 1000 -D app
 
 RUN apk update && \
-  apk add \
-  pcre \
-  pcre-dev \
-  build-base \
-  gcc \
-  linux-headers \
-  openssl \
-  libffi-dev \
-  uwsgi \
-  uwsgi-python3 \
-  && pip install pipenv
+    apk add \
+    pcre \
+    pcre-dev \
+    build-base \
+    gcc \
+    linux-headers \
+    openssl \
+    libffi-dev
 
-RUN mkdir -p /var/www/app && mkdir /app
+RUN pip install --no-cache-dir flask flask-cors gunicorn
 
-COPY Pipfile /app
+RUN mkdir -p /var/www/app
 
-RUN cd /app && \
-  sed -i '/^uwsgi = /d' Pipfile && \
-  pipenv install --system --skip-lock
+RUN mkdir /backend
 
-COPY . /app
+COPY . /backend
 
-CMD uwsgi --http :5000 --master --enable-threads -s /var/www/app/app.sock --manage-script-name --mount /=app:app
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "backend:app"]
